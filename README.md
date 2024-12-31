@@ -11,7 +11,6 @@ For more details, visit the project's [website](https://jod35.github.io/fastapi-
 3. [Project Setup](#project-setup)
 4. [Running the Application](#running-the-application)
 5. [Running Tests](#running-tests)
-6. [Contributing](#contributing)
 
 ## Getting Started
 Follow the instructions below to set up and run your FastAPI project.
@@ -19,14 +18,14 @@ Follow the instructions below to set up and run your FastAPI project.
 ### Prerequisites
 Ensure you have the following installed:
 
-- Python >= 3.10
+- Python >= 3.11
 - PostgreSQL
 - Redis
 
 ### Project Setup
 1. Clone the project repository:
     ```bash
-    git clone https://github.com/jod35/fastapi-beyond-CRUD.git
+    git clone https://github.com/kamran945/fastapi-demo-beyond-crud.git
     ```
    
 2. Navigate to the project directory:
@@ -76,5 +75,3 @@ Run the tests using this command
 pytest
 ```
 
-## Contributing
-I welcome contributions to improve the documentation! You can contribute [here](https://github.com/jod35/fastapi-beyond-crud-docs).
