@@ -4,73 +4,74 @@ from fastapi.responses import JSONResponse
 from fastapi import FastAPI, status
 from sqlalchemy.exc import SQLAlchemyError
 
-class BooklyException(Exception):
-    """This is the base class for all bookly errors"""
+
+class PosException(Exception):
+    """This is the base class for all pos errors"""
 
     pass
 
 
-class InvalidToken(BooklyException):
+class InvalidToken(PosException):
     """User has provided an invalid or expired token"""
 
     pass
 
 
-class RevokedToken(BooklyException):
+class RevokedToken(PosException):
     """User has provided a token that has been revoked"""
 
     pass
 
 
-class AccessTokenRequired(BooklyException):
+class AccessTokenRequired(PosException):
     """User has provided a refresh token when an access token is needed"""
 
     pass
 
 
-class RefreshTokenRequired(BooklyException):
+class RefreshTokenRequired(PosException):
     """User has provided an access token when a refresh token is needed"""
 
     pass
 
 
-class UserAlreadyExists(BooklyException):
+class UserAlreadyExists(PosException):
     """User has provided an email for a user who exists during sign up."""
 
     pass
 
 
-class InvalidCredentials(BooklyException):
+class InvalidCredentials(PosException):
     """User has provided wrong email or password during log in."""
 
     pass
 
 
-class InsufficientPermission(BooklyException):
+class InsufficientPermission(PosException):
     """User does not have the neccessary permissions to perform an action."""
 
     pass
 
 
-class BookNotFound(BooklyException):
-    """Book Not found"""
+class ProductNotFound(PosException):
+    """Product Not found"""
 
     pass
 
 
-class TagNotFound(BooklyException):
+class TagNotFound(PosException):
     """Tag Not found"""
 
     pass
 
 
-class TagAlreadyExists(BooklyException):
+class TagAlreadyExists(PosException):
     """Tag already exists"""
 
     pass
 
 
-class UserNotFound(BooklyException):
+class UserNotFound(PosException):
     """User Not found"""
 
     pass
@@ -78,13 +79,15 @@ class UserNotFound(BooklyException):
 
 class AccountNotVerified(Exception):
     """Account not yet verified"""
+
     pass
+
 
 def create_exception_handler(
     status_code: int, initial_detail: Any
 ) -> Callable[[Request, Exception], JSONResponse]:
 
-    async def exception_handler(request: Request, exc: BooklyException):
+    async def exception_handler(request: Request, exc: PosException):
 
         return JSONResponse(content=initial_detail, status_code=status_code)
 
@@ -114,12 +117,12 @@ def register_all_errors(app: FastAPI):
         ),
     )
     app.add_exception_handler(
-        BookNotFound,
+        ProductNotFound,
         create_exception_handler(
             status_code=status.HTTP_404_NOT_FOUND,
             initial_detail={
-                "message": "Book not found",
-                "error_code": "book_not_found",
+                "message": "Product not found",
+                "error_code": "product_not_found",
             },
         ),
     )
@@ -207,12 +210,12 @@ def register_all_errors(app: FastAPI):
     )
 
     app.add_exception_handler(
-        BookNotFound,
+        ProductNotFound,
         create_exception_handler(
             status_code=status.HTTP_404_NOT_FOUND,
             initial_detail={
-                "message": "Book Not Found",
-                "error_code": "book_not_found",
+                "message": "Product Not Found",
+                "error_code": "product_not_found",
             },
         ),
     )
@@ -224,7 +227,7 @@ def register_all_errors(app: FastAPI):
             initial_detail={
                 "message": "Account Not verified",
                 "error_code": "account_not_verified",
-                "resolution":"Please check your email for verification details"
+                "resolution": "Please check your email for verification details",
             },
         ),
     )
@@ -239,7 +242,6 @@ def register_all_errors(app: FastAPI):
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
 
     @app.exception_handler(SQLAlchemyError)
     async def database__error(request, exc):

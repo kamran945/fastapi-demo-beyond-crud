@@ -16,30 +16,31 @@ user_role_checker = Depends(RoleChecker(["user", "admin"]))
 
 @review_router.get("/", dependencies=[admin_role_checker])
 async def get_all_reviews(session: AsyncSession = Depends(get_session)):
-    books = await review_service.get_all_reviews(session)
+    reviews = await review_service.get_all_reviews(session)
 
-    return books
+    return reviews
 
 
 @review_router.get("/{review_uid}", dependencies=[user_role_checker])
 async def get_review(review_uid: str, session: AsyncSession = Depends(get_session)):
-    book = await review_service.get_review(review_uid, session)
-
-    if not book:
+    review = await review_service.get_review(review_uid, session)
+    # print(f"REVIEW: {review}")
+    if not review:
         raise
+    return review
 
 
-@review_router.post("/book/{book_uid}", dependencies=[user_role_checker])
-async def add_review_to_books(
-    book_uid: str,
+@review_router.post("/product/{product_uid}", dependencies=[user_role_checker])
+async def add_review_to_products(
+    product_uid: str,
     review_data: ReviewCreateModel,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    new_review = await review_service.add_review_to_book(
+    new_review = await review_service.add_review_to_product(
         user_email=current_user.email,
         review_data=review_data,
-        book_uid=book_uid,
+        product_uid=product_uid,
         session=session,
     )
 
@@ -56,7 +57,7 @@ async def delete_review(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    await review_service.delete_review_to_from_book(
+    await review_service.delete_review_to_from_product(
         review_uid=review_uid, user_email=current_user.email, session=session
     )
 

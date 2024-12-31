@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 from src.auth.dependencies import RoleChecker
-from src.books.schemas import Book
+from src.products.schemas import Product
 from src.db.main import get_session
 
 from .schemas import TagAddModel, TagCreateModel, TagModel
@@ -39,17 +39,21 @@ async def add_tag(
 
 
 @tags_router.post(
-    "/book/{book_uid}/tags", response_model=Book, dependencies=[user_role_checker]
+    "/product/{product_uid}/tags",
+    response_model=Product,
+    dependencies=[user_role_checker],
 )
-async def add_tags_to_book(
-    book_uid: str, tag_data: TagAddModel, session: AsyncSession = Depends(get_session)
-) -> Book:
+async def add_tags_to_product(
+    product_uid: str,
+    tag_data: TagAddModel,
+    session: AsyncSession = Depends(get_session),
+) -> Product:
 
-    book_with_tag = await tag_service.add_tags_to_book(
-        book_uid=book_uid, tag_data=tag_data, session=session
+    product_with_tag = await tag_service.add_tags_to_product(
+        product_uid=product_uid, tag_data=tag_data, session=session
     )
 
-    return book_with_tag
+    return product_with_tag
 
 
 @tags_router.put(

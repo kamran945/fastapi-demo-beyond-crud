@@ -3,13 +3,14 @@ from fastapi.exceptions import HTTPException
 from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from src.books.service import BookService
+from src.products.service import ProductService
 from src.db.models import Tag
 
 from .schemas import TagAddModel, TagCreateModel
-from src.errors import BookNotFound, TagNotFound, TagAlreadyExists
 
-book_service = BookService()
+# from src.errors import BookNotFound, TagNotFound, TagAlreadyExists
+
+product_service = ProductService()
 
 
 server_error = HTTPException(
@@ -28,15 +29,20 @@ class TagService:
 
         return result.all()
 
-    async def add_tags_to_book(
-        self, book_uid: str, tag_data: TagAddModel, session: AsyncSession
+    async def add_tags_to_product(
+        self, product_uid: str, tag_data: TagAddModel, session: AsyncSession
     ):
-        """Add tags to a book"""
+        """Add tags to a product"""
 
-        book = await book_service.get_book(book_uid=book_uid, session=session)
+        product = await product_service.get_product(
+            product_uid=product_uid, session=session
+        )
 
-        if not book:
-            raise BookNotFound()
+        if not product:
+            # raise BookNotFound()
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+            )
 
         for tag_item in tag_data.tags:
             result = await session.exec(select(Tag).where(Tag.name == tag_item.name))
@@ -45,11 +51,11 @@ class TagService:
             if not tag:
                 tag = Tag(name=tag_item.name)
 
-            book.tags.append(tag)
-        session.add(book)
+            product.tags.append(tag)
+        session.add(product)
         await session.commit()
-        await session.refresh(book)
-        return book
+        await session.refresh(product)
+        return product
 
     async def get_tag_by_uid(self, tag_uid: str, session: AsyncSession):
         """Get tag by uid"""
@@ -103,7 +109,7 @@ class TagService:
     async def delete_tag(self, tag_uid: str, session: AsyncSession):
         """Delete a tag"""
 
-        tag = self.get_tag_by_uid(tag_uid,session)
+        tag = self.get_tag_by_uid(tag_uid, session)
 
         if not tag:
             raise TagNotFound()

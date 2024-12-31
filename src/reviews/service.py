@@ -6,32 +6,34 @@ from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.auth.service import UserService
-from src.books.service import BookService
+from src.products.service import ProductService
 from src.db.models import Review
 
 from .schemas import ReviewCreateModel
 
-book_service = BookService()
+product_service = ProductService()
 user_service = UserService()
 
 
 class ReviewService:
-    async def add_review_to_book(
+    async def add_review_to_product(
         self,
         user_email: str,
-        book_uid: str,
+        product_uid: str,
         review_data: ReviewCreateModel,
         session: AsyncSession,
     ):
         try:
-            book = await book_service.get_book(book_uid=book_uid, session=session)
+            product = await product_service.get_product(
+                product_uid=product_uid, session=session
+            )
             user = await user_service.get_user_by_email(
                 email=user_email, session=session
             )
             review_data_dict = review_data.model_dump()
-            if not book:
+            if not product:
                 raise HTTPException(
-                    detail="Book not found", status_code=status.HTTP_404_NOT_FOUND
+                    detail="product not found", status_code=status.HTTP_404_NOT_FOUND
                 )
 
             if not user:
@@ -39,7 +41,7 @@ class ReviewService:
                     detail="User not found", status_code=status.HTTP_404_NOT_FOUND
                 )
 
-            new_review = Review(**review_data_dict, user=user, book=book)
+            new_review = Review(**review_data_dict, user=user, product=product)
 
             session.add(new_review)
 
@@ -58,7 +60,7 @@ class ReviewService:
         statement = select(Review).where(Review.uid == review_uid)
 
         result = await session.exec(statement)
-
+        # print("REVIEW: ", result.first())
         return result.first()
 
     async def get_all_reviews(self, session: AsyncSession):
@@ -68,7 +70,7 @@ class ReviewService:
 
         return result.all()
 
-    async def delete_review_to_from_book(
+    async def delete_review_to_from_product(
         self, review_uid: str, user_email: str, session: AsyncSession
     ):
         user = await user_service.get_user_by_email(user_email, session)
@@ -84,4 +86,3 @@ class ReviewService:
         session.delete(review)
 
         await session.commit()
-

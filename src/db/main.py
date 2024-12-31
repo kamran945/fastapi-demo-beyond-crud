@@ -4,13 +4,21 @@ from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.config import Config
+from src.db.models import Product
 
-async_engine = AsyncEngine(create_engine(url=Config.DATABASE_URL))
+async_engine = AsyncEngine(
+    create_engine(
+        url=Config.DATABASE_URL,
+        # echo=True,
+    )
+)
 
 
 async def init_db() -> None:
     async with async_engine.begin() as conn:
+        print("initializing database...")
         await conn.run_sync(SQLModel.metadata.create_all)
+        print("database initialized successfully")
 
 
 async def get_session() -> AsyncSession:
